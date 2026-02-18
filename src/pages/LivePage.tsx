@@ -139,6 +139,42 @@ export default function LivePage() {
               <p className="text-lg font-medium text-text-primary">{formatTokens(activeBlock.outputTokens)}</p>
             </div>
           </div>
+
+          {/* Token limit status */}
+          {activeBlock.tokenLimitStatus && (
+            <div className="mt-4">
+              <div className="flex justify-between text-xs text-text-muted mb-1">
+                <span>Token Limit</span>
+                <span>
+                  {formatTokens(activeBlock.tokenLimitStatus.projectedUsage)} / {formatTokens(activeBlock.tokenLimitStatus.limit)}
+                  {" "}({activeBlock.tokenLimitStatus.percentUsed.toFixed(1)}%)
+                </span>
+              </div>
+              <div className="w-full bg-surface-alt rounded-full h-2.5">
+                <div
+                  className={`h-2.5 rounded-full transition-all duration-1000 ${
+                    activeBlock.tokenLimitStatus.status === "exceeds"
+                      ? "bg-danger"
+                      : activeBlock.tokenLimitStatus.status === "warning"
+                      ? "bg-warning"
+                      : "bg-success"
+                  }`}
+                  style={{
+                    width: `${Math.min(100, activeBlock.tokenLimitStatus.percentUsed)}%`,
+                  }}
+                />
+              </div>
+              {activeBlock.tokenLimitStatus.status !== "ok" && (
+                <p className={`text-xs mt-1 ${
+                  activeBlock.tokenLimitStatus.status === "exceeds" ? "text-danger" : "text-warning"
+                }`}>
+                  {activeBlock.tokenLimitStatus.status === "exceeds"
+                    ? "Projected usage exceeds token limit"
+                    : "Approaching token limit"}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
 

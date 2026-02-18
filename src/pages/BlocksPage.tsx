@@ -112,7 +112,7 @@ export default function BlocksPage() {
             </div>
           </div>
 
-          {/* Progress bar */}
+          {/* Time progress bar */}
           <div className="mt-4">
             <div className="flex justify-between text-xs text-text-muted mb-1">
               <span>Elapsed</span>
@@ -132,6 +132,42 @@ export default function BlocksPage() {
               />
             </div>
           </div>
+
+          {/* Token limit status */}
+          {stats.activeBlock.tokenLimitStatus && (
+            <div className="mt-4">
+              <div className="flex justify-between text-xs text-text-muted mb-1">
+                <span>Token Usage</span>
+                <span>
+                  {formatTokens(stats.activeBlock.tokenLimitStatus.projectedUsage)} / {formatTokens(stats.activeBlock.tokenLimitStatus.limit)}
+                  {" "}({stats.activeBlock.tokenLimitStatus.percentUsed.toFixed(1)}%)
+                </span>
+              </div>
+              <div className="w-full bg-surface-alt rounded-full h-2">
+                <div
+                  className={`h-2 rounded-full transition-all ${
+                    stats.activeBlock.tokenLimitStatus.status === "exceeds"
+                      ? "bg-danger"
+                      : stats.activeBlock.tokenLimitStatus.status === "warning"
+                      ? "bg-warning"
+                      : "bg-success"
+                  }`}
+                  style={{
+                    width: `${Math.min(100, stats.activeBlock.tokenLimitStatus.percentUsed)}%`,
+                  }}
+                />
+              </div>
+              {stats.activeBlock.tokenLimitStatus.status !== "ok" && (
+                <p className={`text-xs mt-1 ${
+                  stats.activeBlock.tokenLimitStatus.status === "exceeds" ? "text-danger" : "text-warning"
+                }`}>
+                  {stats.activeBlock.tokenLimitStatus.status === "exceeds"
+                    ? "Projected usage exceeds token limit"
+                    : "Approaching token limit"}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -217,6 +253,28 @@ export default function BlocksPage() {
             header: "End",
             render: (r) => <span className="text-xs text-text-muted">{formatDateTime(r.endTime)}</span>,
             sortValue: (r) => r.endTime,
+          },
+          {
+            key: "tokenLimit",
+            header: "Token Limit",
+            align: "right",
+            render: (r) =>
+              r.tokenLimitStatus ? (
+                <span
+                  className={`text-xs font-medium ${
+                    r.tokenLimitStatus.status === "exceeds"
+                      ? "text-danger"
+                      : r.tokenLimitStatus.status === "warning"
+                      ? "text-warning"
+                      : "text-success"
+                  }`}
+                >
+                  {r.tokenLimitStatus.percentUsed.toFixed(1)}%
+                </span>
+              ) : (
+                <span className="text-xs text-text-muted">--</span>
+              ),
+            sortValue: (r) => r.tokenLimitStatus?.percentUsed ?? -1,
           },
         ]}
       />

@@ -11,7 +11,7 @@ const router = Router();
 router.get("/", async (_req, res) => {
   try {
     const data = await cache.get<BlocksData>("blocks", config.cache.blocksTtl, async () => {
-      const raw = await execCcusage(["blocks", "--json"]);
+      const raw = await execCcusage(["blocks", "--json", "--token-limit", "max"]);
       return normalizeBlocks(parseFirstJson<CcusageBlocksResponse>(raw));
     });
 

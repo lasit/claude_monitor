@@ -112,6 +112,7 @@ export function normalizeBlocks(raw: CcusageBlocksResponse): BlocksData {
     entries: b.entries ?? 0,
     burnRate: b.burnRate,
     projection: b.projection,
+    tokenLimitStatus: b.tokenLimitStatus,
   }));
 
   const totalCost = blocks.reduce((s, b) => s + b.cost, 0);

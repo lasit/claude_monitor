@@ -32,7 +32,7 @@ export async function warmUpCache() {
       return normalizeSessions(parseFirstJson<CcusageSessionResponse>(raw));
     }),
     cache.refresh("blocks", config.cache.blocksTtl, async () => {
-      const raw = await execCcusage(["blocks", "--json"]);
+      const raw = await execCcusage(["blocks", "--json", "--token-limit", "max"]);
       return normalizeBlocks(parseFirstJson<CcusageBlocksResponse>(raw));
     }),
   ];

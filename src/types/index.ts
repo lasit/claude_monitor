@@ -70,6 +70,12 @@ export interface CcusageBlockEntry {
     totalCost: number;
     remainingMinutes: number;
   } | null;
+  tokenLimitStatus?: {
+    limit: number;
+    projectedUsage: number;
+    percentUsed: number;
+    status: "ok" | "warning" | "exceeds";
+  };
 }
 
 export interface CcusageBlocksResponse {
@@ -167,6 +173,12 @@ export interface BlockEntry {
     totalCost: number;
     remainingMinutes: number;
   } | null;
+  tokenLimitStatus?: {
+    limit: number;
+    projectedUsage: number;
+    percentUsed: number;
+    status: "ok" | "warning" | "exceeds";
+  };
 }
 
 export interface BlocksData {
@@ -187,4 +199,10 @@ export interface MetaResponse {
   caches: CacheStatus[];
   serverStartedAt: string;
   uptime: number;
+}
+
+export interface SubscriptionInfo {
+  subscriptionType: string;
+  rateLimitTier: string;
+  tokenLimit: number | null;
 }
