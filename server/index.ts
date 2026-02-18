@@ -7,6 +7,7 @@ import sessionsRoutes from "./routes/sessions.js";
 import blocksRoutes from "./routes/blocks.js";
 import metaRoutes from "./routes/meta.js";
 import subscriptionRoutes from "./routes/subscription.js";
+import usageRoutes from "./routes/usage.js";
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use("/api/sessions", sessionsRoutes);
 app.use("/api/blocks", blocksRoutes);
 app.use("/api/meta", metaRoutes);
 app.use("/api/subscription", subscriptionRoutes);
+app.use("/api/usage", usageRoutes);
 
 // Health check
 app.get("/api/health", (_req, res) => {

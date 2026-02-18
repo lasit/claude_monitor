@@ -70,3 +70,28 @@ export function formatPct(value: number, total: number): string {
   if (total === 0) return "0%";
   return `${((value / total) * 100).toFixed(1)}%`;
 }
+
+/**
+ * Format time remaining until an ISO timestamp as "X hr Y min" or "expired".
+ */
+export function formatTimeUntil(iso: string): string {
+  const diff = new Date(iso).getTime() - Date.now();
+  if (diff <= 0) return "expired";
+  const totalMin = Math.floor(diff / 60_000);
+  const hr = Math.floor(totalMin / 60);
+  const min = totalMin % 60;
+  if (hr === 0) return `${min} min`;
+  return min > 0 ? `${hr} hr ${min} min` : `${hr} hr`;
+}
+
+/**
+ * Format an ISO timestamp to a short day+time like "Tue 8:30 AM".
+ */
+export function formatResetDateTime(iso: string): string {
+  return new Date(iso).toLocaleString("en-AU", {
+    weekday: "short",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}

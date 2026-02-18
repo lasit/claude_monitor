@@ -4,6 +4,7 @@ import { config } from "../config.js";
 import { execCcusage } from "../ccusage/executor.js";
 import { parseFirstJson } from "../ccusage/parser.js";
 import { normalizeDaily, normalizeMonthly, normalizeSessions, normalizeBlocks } from "../ccusage/normalizer.js";
+import { fetchUsageFromApi } from "./usage.js";
 import type {
   CcusageDailyResponse,
   CcusageMonthlyResponse,
@@ -45,6 +46,8 @@ router.post("/refresh", async (req, res) => {
           const raw = await execCcusage(["blocks", "--json", "--token-limit", "max"]);
           return normalizeBlocks(parseFirstJson<CcusageBlocksResponse>(raw));
         }),
+      usage: () =>
+        cache.refresh("usage", config.cache.usageTtl, fetchUsageFromApi),
     };
 
     if (endpoint === "all") {

@@ -10,6 +10,7 @@ Claude Code doesn't have a built-in dashboard. The `ccusage` CLI provides raw da
 - **Caches aggressively** so you're not waiting 22 seconds on every page load
 - **Tracks billing blocks** — the 5-hour billing windows that determine your Max plan costs
 - **Compares projects** side-by-side with filtering and drill-down
+- **Shows plan limits** — session and weekly rate limits plus extra usage spend, pulled from the Anthropic OAuth API
 - **Auto-refreshes** to keep data current while you work
 
 ## Screenshots
@@ -23,6 +24,7 @@ Claude Code doesn't have a built-in dashboard. The `ccusage` CLI provides raw da
 - **Node.js** v20+ (tested with v24.4.1)
 - **ccusage** v18+ installed globally or available via `npx`
 - **Claude Code** session data in `~/.claude/projects/`
+- **Claude Code OAuth credentials** at `~/.claude/.credentials.json` (created automatically when you sign in to Claude Code — needed for the Limits page)
 
 ### Install & Run
 
@@ -65,8 +67,10 @@ PORT=3001                           # Express API server port
 ```
 Browser (React)  ──▶  Vite Dev Proxy  ──▶  Express API  ──▶  CacheManager  ──▶  ccusage CLI
    │                    :5173/api/*          :3001              (in-memory)        (~22s)
+   │                                            │
+   │                                            └──▶  Anthropic OAuth API (plan limits, ~200ms)
    │
-   └── React Query (client-side cache, polling every 45s)
+   └── React Query (client-side cache, polling every 45–60s)
 ```
 
 ### Two-Tier Caching
@@ -83,6 +87,7 @@ The dashboard uses aggressive caching to hide `ccusage`'s 22-second execution ti
 | Monthly aggregate | 10 min | Stale-while-revalidate |
 | Sessions | 5 min | Stale-while-revalidate |
 | Billing blocks | 45 sec | Stale-while-revalidate |
+| Plan usage limits | 60 sec | Stale-while-revalidate |
 
 ### Cache Warm-Up
 
@@ -111,6 +116,9 @@ Billing block timeline showing cost per 5-hour window. Active block detail panel
 ### Live (`/live`)
 Real-time monitoring with auto-refresh indicator, active block cost and burn rate, recent blocks mini-chart, and cache status for all endpoints (showing fresh/stale/refreshing states and TTLs).
 
+### Limits (`/limits`)
+Plan usage limits pulled from the Anthropic OAuth API (not ccusage). Shows session (5-hour) and weekly rate limit progress bars with utilization percentages and reset countdowns, plus extra usage spending against monthly limit. Progress bars change colour: green < 70%, amber 70–90%, red > 90%. Windows with no active data (e.g., no current session) are hidden automatically. Auto-refreshes every 60 seconds.
+
 ## Project Structure
 
 ```
@@ -136,7 +144,9 @@ claude_monitor/
 │   │   ├── monthly.ts                    # GET /api/monthly, /api/monthly/aggregate
 │   │   ├── sessions.ts                   # GET /api/sessions
 │   │   ├── blocks.ts                     # GET /api/blocks
-│   │   └── meta.ts                       # GET /api/meta, POST /api/meta/refresh
+│   │   ├── meta.ts                       # GET /api/meta, POST /api/meta/refresh
+│   │   ├── subscription.ts              # GET /api/subscription
+│   │   └── usage.ts                     # GET /api/usage (Anthropic OAuth API)
 │   └── transforms/
 │       ├── project-names.ts              # Path-to-short-name extraction
 │       ├── monthly-by-project.ts         # Derives per-project monthly from daily
@@ -173,7 +183,8 @@ claude_monitor/
 │       ├── ModelsPage.tsx                # Model analysis
 │       ├── SessionsPage.tsx              # Session browser
 │       ├── BlocksPage.tsx                # Billing blocks
-│       └── LivePage.tsx                  # Real-time monitor
+│       ├── LivePage.tsx                  # Real-time monitor
+│       └── LimitsPage.tsx               # Plan usage limits
 ```
 
 ## API Reference
@@ -252,11 +263,37 @@ Returns billing block data with gap blocks filtered out.
 }
 ```
 
+### `GET /api/subscription`
+Returns subscription type and rate limit tier from `~/.claude/.credentials.json`.
+
+**Response:** `SubscriptionInfo`
+```json
+{
+  "subscriptionType": "claude_max_5x",
+  "rateLimitTier": "default_claude_max_5x",
+  "tokenLimit": 86595595
+}
+```
+
+### `GET /api/usage`
+Returns plan usage limits from the Anthropic OAuth API. Reads the OAuth access token from `~/.claude/.credentials.json` on each call (token may be refreshed by Claude Code). Cached at 60-second TTL. Returns 500 with a descriptive message if the token is expired.
+
+**Response:** `PlanUsageResponse`
+```json
+{
+  "five_hour": { "utilization": 53.0, "resets_at": "2026-02-18T09:00:00Z" },
+  "seven_day": { "utilization": 21.0, "resets_at": "2026-02-23T23:00:01Z" },
+  "seven_day_opus": null,
+  "seven_day_sonnet": { "utilization": 10.0, "resets_at": "2026-02-21T06:00:00Z" },
+  "extra_usage": { "is_enabled": true, "monthly_limit": 7750, "used_credits": 3675, "utilization": 47.4 }
+}
+```
+
 ### `GET /api/meta`
 Returns cache status for all endpoints.
 
 ### `POST /api/meta/refresh?endpoint=`
-Force-refreshes one or all caches. Pass `endpoint=daily`, `endpoint=blocks`, etc., or omit for all.
+Force-refreshes one or all caches. Pass `endpoint=daily`, `endpoint=blocks`, `endpoint=usage`, etc., or omit for all.
 
 ### `GET /api/health`
 Health check. Returns `{ "status": "ok" }`.
@@ -291,6 +328,10 @@ npm run server    # Start Express server only
 npm run build     # Production build (TypeScript check + Vite bundle)
 npm run preview   # Preview production build
 ```
+
+### Windows Note
+
+The dev script uses `node --watch --import tsx/esm` instead of `tsx watch`. The `tsx watch` command hangs silently when spawned inside `concurrently` on Windows. Node's built-in `--watch` flag (available since Node 18.11) does not have this issue.
 
 ### Manual Testing
 

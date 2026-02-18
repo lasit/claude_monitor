@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k -n server,client -c blue,green \"tsx watch server/index.ts\" \"vite\"",
+    "dev": "concurrently -k -n server,client -c blue,green \"node --watch --import tsx/esm server/index.ts\" \"vite\"",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "server": "tsx watch server/index.ts"
+    "server": "node --watch --import tsx/esm server/index.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.64.0",

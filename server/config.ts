@@ -8,6 +8,7 @@ export const config = {
     monthlyTtl: 10 * 60 * 1000,  // 10 minutes
     sessionsTtl: 5 * 60 * 1000,  // 5 minutes
     blocksTtl: 45 * 1000,        // 45 seconds
+    usageTtl: 60 * 1000,         // 60 seconds
   },
   ccusage: {
     timeout: 60_000,             // 60 second timeout for ccusage calls

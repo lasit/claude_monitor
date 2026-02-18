@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "./client";
-import type { DailyEntry, MonthlyEntry, SessionEntry, BlocksData, MetaResponse, SubscriptionInfo } from "../types";
+import type { DailyEntry, MonthlyEntry, SessionEntry, BlocksData, MetaResponse, SubscriptionInfo, PlanUsageResponse } from "../types";
 
 export function useDaily(since?: string, until?: string) {
   const params = new URLSearchParams();
@@ -57,6 +57,15 @@ export function useSubscription() {
     queryFn: () => apiFetch("/subscription"),
     staleTime: 5 * 60_000, // Subscription info rarely changes
     refetchInterval: false,
+  });
+}
+
+export function usePlanUsage() {
+  return useQuery<PlanUsageResponse>({
+    queryKey: ["usage"],
+    queryFn: () => apiFetch("/usage"),
+    refetchInterval: 60_000,
+    staleTime: 30_000,
   });
 }
 

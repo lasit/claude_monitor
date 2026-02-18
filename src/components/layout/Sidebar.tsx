@@ -8,6 +8,7 @@ const links = [
   { to: "/sessions", label: "Sessions", icon: "list" },
   { to: "/blocks", label: "Blocks", icon: "clock" },
   { to: "/live", label: "Live", icon: "activity" },
+  { to: "/limits", label: "Limits", icon: "shield" },
 ] as const;
 
 const iconMap: Record<string, string> = {
@@ -18,6 +19,7 @@ const iconMap: Record<string, string> = {
   list: "M4 6h16M4 12h16M4 18h16",
   clock: "M12 6v6l4 2m6-2a10 10 0 11-20 0 10 10 0 0120 0z",
   activity: "M22 12h-4l-3 9L9 3l-3 9H2",
+  shield: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
 };
 
 export default function Sidebar() {

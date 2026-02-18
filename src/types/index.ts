@@ -206,3 +206,25 @@ export interface SubscriptionInfo {
   rateLimitTier: string;
   tokenLimit: number | null;
 }
+
+// === Plan usage limits (Anthropic OAuth API) ===
+
+export interface UsageLimitWindow {
+  utilization: number;
+  resets_at: string;
+}
+
+export interface ExtraUsageInfo {
+  is_enabled: boolean;
+  monthly_limit: number;
+  used_credits: number;
+  utilization: number;
+}
+
+export interface PlanUsageResponse {
+  five_hour: UsageLimitWindow | null;
+  seven_day: UsageLimitWindow | null;
+  seven_day_opus: UsageLimitWindow | null;
+  seven_day_sonnet: UsageLimitWindow | null;
+  extra_usage: ExtraUsageInfo | null;
+}

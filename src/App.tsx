@@ -7,6 +7,7 @@ import ModelsPage from "./pages/ModelsPage";
 import SessionsPage from "./pages/SessionsPage";
 import BlocksPage from "./pages/BlocksPage";
 import LivePage from "./pages/LivePage";
+import LimitsPage from "./pages/LimitsPage";
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="sessions" element={<SessionsPage />} />
         <Route path="blocks" element={<BlocksPage />} />
         <Route path="live" element={<LivePage />} />
+        <Route path="limits" element={<LimitsPage />} />
       </Route>
     </Routes>
   );
